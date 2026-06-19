@@ -1,0 +1,801 @@
+FingerSlider: A Single-Handed Multi-Attribute
+Gesture Interface for Intuitive VR Control
+Bofei Huang, Mikiya Kusunoki, Haoran Xie
+Japan Advanced Institute of Science and Technology, Ishikawa, Japan
+Email: s2520016@jaist.ac.jp, s2420019@jaist.ac.jp, xie@jaist.ac.jp
+
+Abstract—The control interfaces of virtual reality (VR) control interfaces have a fundamental trade-off between control
+naturalness and precision. This paper proposes FingerSlider, a
+novel single-handed interaction system that integrates optical
+hand tracking with adaptive parameter mapping to control
+virtual objects through finger movements. Each finger is mapped
+to a specific control parameter (e.g., the index finger for the
+X-axis, the middle finger for the Y-axis), transforming finger
+movements into virtual sliders. FingerSlider enables simultaneous
+adjustment of multiple object attributes (position, scale, rotation)
+while maintaining high control precision and reducing cognitive
+load. The proposed approach dynamically maps thumb-to-finger
+sliding distances to control parameters through vector projection
+and normalization, achieving real-time performance with low
+computational complexity. Comparison experiments demonstrate
+that FingerSlider significantly outperformed conventional methods, reducing task completion time by 43% in single-parameter
+tasks (24.5s vs. 43.0s). While the initial four-finger prototype revealed limitations in multi-finger coordination (SUS score: 58.75),
+the optimized two-finger system achieved high usability (SUS
+score: 82.81), representing a 40.95% improvement. These findings
+suggest potential applications of FingerSlider in various VR tasks,
+including 3D object manipulation and content browsing.
+
+I. I NTRODUCTION
+Virtual Reality (VR) is increasingly adopted in diverse
+fields, including medical simulation and industrial design [1],
+[2]. As VR evolves, gesture-based interactions have gained
+popularity, offering more natural and intuitive control by
+aligning with human motor habits and reducing reliance on
+physical controllers [3], [4]. However, a challenging issue in
+VR gesture control is balancing naturalness with precision required for complex tasks [3]. Current interfaces often struggle
+with precision and efficiency, particularly for multi-attribute
+adjustments or fine-grained manipulations, limiting their utility
+in professional, accuracy-critical scenarios.
+Existing VR gesture interfaces predominantly use direct or
+indirect manipulation paradigms [5]–[7]. Direct manipulation,
+while intuitive, often lacks precision for detailed adjustments
+or distant interactions [8], [9] and can induce physical fatigue, commonly referred to as “gorilla arm syndrome” [10].
+Conversely, indirect methods, such as ray casting or virtual
+sliders, can improve precision and reduce strain. Still, they
+may compromise immersion and increase cognitive load due to
+the mental mapping required between hand actions and virtual
+controls. This highlights a core VR interface design challenge:
+Corresponding author: Haoran Xie (email: xie@jaist.ac.jp)
+
+Fig. 1: Overview diagram of the proposed FingerSlider. The
+thumb slides along the index finger (e.g., towards the second
+joint) to control an object.
+
+achieving parameter control while maintaining intuitive handbased interaction. A key limitation is the underutilization
+of human finger dexterity, which is well-suited for nuanced
+parameter adjustments but is often overlooked by systems that
+rely on coarse hand or arm movements.
+To address these challenges, we introduce FingerSlider
+(Fig. 1), a novel gesture-based interface transforming thumbto-finger sliding motions into a multi-attribute control mechanism for VR. FingerSlider integrates optical hand tracking with
+a custom vector projection algorithm, leveraging natural finger
+movements to create intuitive interaction patterns. Designed
+according to human motor control principles [11] and prioritizing comfortable, easily performable gestures, the system aligns
+with users’ habitual behaviors. It enables simultaneous, singlehanded control of multiple object attributes (e.g., position,
+scale) without the need for external devices or explicit visual
+sliders, aiming to reduce cognitive load and enhance control
+precision. Our evaluations, which involve object manipulation
+and content browsing, demonstrate the effectiveness of FingerSlider. For instance, in single-parameter object manipulation,
+FingerSlider reduced task completion time by 43% (24.5s vs.
+43.0s) compared to a conventional method. An optimized twofinger version achieved a high System Usability Scale (SUS)
+score of 82.81, indicating intense user satisfaction despite
+initial challenges with multi-finger coordination.
+The primary contributions of FingerSlider are:
+
+1) Finger-Based Multi-Attribute Mapping: Assigning
+distinct parameters to individual finger sliding gestures
+enables efficient, simultaneous multi-attribute adjustments with a single hand.
+2) Reduced Visual and Physical Load: By integrating
+controls onto the user’s fingers, FingerSlider minimizes
+on-screen UI elements and mitigates arm fatigue during
+extended use.
+3) Optimized Interaction for Specific Tasks: FingerSlider
+is an efficient interaction paradigm for rapid, intuitive
+adjustments. It reduces task time by 43% in singleparameter tasks and by over 30% in VR long-form text
+reading.
+
+(a) Operate with hand in side pro- (b) Operate with palm facing
+file.
+tracker.
+
+Fig. 2: Control interface postures for the proposed FingerSlider.
+
+II. R ELATED W ORK
+A. Direct and Indirect Manipulation
+VR interaction techniques are categorized as direct or
+indirect, reflecting distinct approaches to spatial interaction
+and user cognition. Direct manipulation mimics physical operations with immediate visual feedback and minimal abstraction [12], prioritizing visualization, rapid feedback, and
+reversibility [13]. This aligns with real-world habits, enhancing intuitiveness [14]. However, it suffers from precision
+limitations for small objects, “gorilla arm syndrome” during
+prolonged use [10], and restricted workspace due to limited
+hand movement range [15]. Indirect manipulation employs
+intermediary techniques, such as ray casting, virtual sliders,
+or body-attached interfaces [7], enabling precise control and
+interaction with distant objects [16]. Features like snapping
+enhance precise alignment [17], valuable in engineering education [18], while reducing physical fatigue [10]. Though
+potentially disrupting immersion and increasing cognitive load,
+indirect methods can foster higher-order thinking in complex
+tasks [17]. We adopted this approach for FingerSlider due
+to its superior precision and control for fine adjustments and
+beyond-reach interactions, despite steeper learning curves.
+B. Slider Interfaces
+Slider interfaces in VR/AR enable continuous parameter
+adjustments and can be categorised into three main types:
+traditional virtual sliders, body-attached interfaces, and onobject interfaces. Traditional sliders range from 2D projections
+to 3D spatial objects, striking a balance between familiarity,
+precision, and immersion. Dachselt and Hübner [19] proposed
+3D sliders that enhance spatial interaction but lack precision in tactile feedback. Body-attached interfaces like palm
+menus [20] or arm-based markers [21] reduce task interruption
+but may increase cognitive load. On-object interfaces integrate
+controls directly onto virtual objects. Examples include wrist
+angle-based slider control for content reading [22], which reduces fatigue but needs accuracy verification; GesPlayer [23],
+using finger movements for video control with unverified
+VR effectiveness; and UbiEdge [24], which places sliders on
+physical object edges for AR interaction but faces environmental limitations (e.g., lying down, absent edges). Universal
+applicability and precision remain challenging. Sliders show
+
+potential across VR applications including visual design [25],
+animation [26], and immersive reading [27]. FingerSlider
+addresses these challenges by combining traditional slider
+precision with natural gesture interaction, minimizing visual
+interference and fatigue for complex VR tasks.
+III. P ROPOSED M ETHOD
+We propose FingerSlider, a novel gesture-based interface
+that transforms finger movements into virtual sliders for
+intuitive parameter control in VR. As shown in Figure 2,
+the system supports two primary operation modes: (a) with
+the hand in a side profile relative to the tracker for optimal
+finger discrimination and (b) with the palm facing the tracker
+as an alternative posture. Both modes utilize thumb-againstfinger sliding motions, blending natural gesture interaction
+with traditional slider precision.
+A. Research Question and Hypotheses
+Despite advancements in VR manipulation, traditional indirect controls can be limited in their precision adjustment
+for multi-attribute settings and may cause fatigue, especially
+when working with large virtual objects or performing finetuning in multiple dimensions. Existing gesture interfaces also
+often underutilize finger dexterity. This leads to our research
+question:
+Can integrating indirect multi-attribute control with
+finger-based sliding gestures enhance efficiency and user
+experience in VR environments compared to traditional
+gesture-based controls? Accordingly, we formulate the following hypotheses:
+H1 The proposed interface performs more efficiently than
+traditional gesture-based VR controls.
+H2 The proposed interface offers a more intuitive and
+preferred user experience than traditional gesture-based
+controls.
+H3 The proposed interface improves spatial awareness and
+parameter adjustment accuracy in VR tasks.
+H4 The proposed interface allows for a faster learning curve
+and reduced operational time compared to traditional
+gesture-based controls.
+
+Fig. 3: The developed prototype system of FingerSlider, showing the Leap Motion controller mounted on the VR headset.
+
+B. System Overview
+FingerSlider leverages optical hand-tracking to convert
+thumb-to-finger sliding movements into a multi-attribute control mechanism. The system uses optical hand tracking for
+multi-attribute control by detecting fine finger movements.
+Users can modify parameters through a thumb-sliding gesture
+along the lateral surface of their fingers. Specifically, users
+may place their thumb tip against the side of a finger (starting
+at the fingertip) and slide it toward the middle joint to
+adjust the corresponding parameter. The fingertip serves as
+the slider’s start point and the middle phalanx as its endpoint
+(Figure 1). During operation, the fingers remain relatively
+stationary while the thumb performs the sliding motion along
+the finger’s surface, creating a stable reference frame for
+precise control. The speed of thumb movement can affect the
+parameter adjustment velocity. Tapping any part of the fingers
+can skip animations.
+
+(a) Interaction elements of the interface and their sizes.
+
+(b) Hardware design of the proposed system.
+
+Fig. 4: Hardware design of the FingerSlider system (b) and
+the interaction elements of the interface (a).
+
+C. Implementation Details
+
+D. Finger-Attribute Mapping Design
+
+The FingerSlider prototype uses an Oculus Quest 2 headset,
+a Leap Motion controller (v5.13.2) for hand tracking (integrated via a custom 3D-printed mount), and a PC (Intel i711800H, RTX 3070 GPU). Components connect via USB 3.0
+Type C for low-latency tracking. Figure 4b shows the Leap
+Motion centrally fixed on the Oculus Quest 2 for cohesive
+visual representation and intuitive capture.
+Gesture recognition was implemented in Unity (version
+2023.1.18f1) using the Ultraleap SDK (version 6.13.0). The
+system initializes in a “no hand” state, switching to a “hand”
+state upon detection. Users control applications by sliding their
+right thumb tip component against the sides of their fingers.
+For slider design (Figure 4a), we used Leap Motion’s ghost
+hand model. Based on average adult finger lengths (e.g., index
+finger 7.29 cm, middle 7.90 cm) [28], we set slider lengths
+at 7 cm for the index, middle, and ring fingers, and 5.5 cm
+for the little finger. Sliders are 8 mm in height and width for
+easy triggering. Interactive buttons within the sliders share this
+height and width, with a length of one-tenth the total slider
+length. A 1 cm diameter green sphere on the thumb tip serves
+as the interactor, highlighting buttons upon capture and moving
+them along the slider bar with thumb movement. Users can
+operate FingerSlider with either their hand side-on (Figure 2a)
+or palm-up (Figure 2b) relative to the Leap Motion, with the
+side-facing mode being primary.
+
+Finger-to-attribute mapping was guided by ergonomic principles, cognitive load theory [29], and Norman’s intuitive
+design principles [11] to reduce cognitive load and enhance
+usability. While gestures can vary culturally [30], sliding is a
+universally intuitive gesture common in touchscreen interactions, facilitating adaptability to mid-air interactions. Integrating sliders onto fingers leverages each finger’s characteristics
+and their parallel structure for multiple simultaneous control
+channels.
+Finger-based sliders can promote spatial and muscle memory, enabling parameter control without constant visual hand
+confirmation. The index finger, with its high flexibility and
+precision [31], typically controls frequently used or highprecision parameters. The middle finger provides a stable
+platform for parameters that require continuous, intuitive adjustment. The less independent ring and little fingers [32] can
+manage essential but less frequently adjusted parameters.
+E. Slider Mapping
+As illustrated in Figure 1, finger movements are transformed into parameter controls via a three-stage process:
+position detection, vector analysis, and adaptive parameter
+mapping. The algorithm tracks two spatial points per finger:
+p⃗1 (fingertip, slider start) and p⃗2 (middle joint) (middle joint,
+slider endpoint). These points define the sliding vector dt =
+
+vecp2 - vecp1 , which indicates the sliding direction and the
+interaction distance. The vector from the slider start point p⃗1
+to the user’s intended target position vecpt is then given by
+dt = vecpt − p⃗1 . To ensure control along the predefined
+sliding direction, dt is projected onto d:
+projd⃗(d⃗t ) =
+
+d⃗t · d⃗ ⃗
+d
+⃗2
+|d|
+
+(1)
+
+This yields consistent input regardless of finger posture.
+Normalization follows, calculating the relative projection distance D∈ [0, 1]:
+D=
+
+|projd⃗(d⃗t )|
+d⃗t · d⃗
+=
+⃗
+⃗2
+|d|
+|d|
+
+(2)
+
+By ensuring D is within the range [0, 1] via the operation
+D = clamp(D, 0, 1), normalisation standardises the input
+across finger lengths and maps small physical movements
+to the full control range, thereby enhancing precision and
+sensitivity.
+D − vmin
+× (mmax − mmin ) + mmin (3)
+vmax − vmin
+vmin , vmax define the adequate projection distance range,
+and mmin , mmax define the target parameter value range.
+This flexible mapping allows FingerSlider to adapt to diverse
+control needs, from linear to non-linear adjustments. The
+algorithm’s O(1) time and space complexity ensure real-time
+performance. A boundary check mechanism ensures that D
+remains within the range [0, 1] for stability. Compared to
+traditional methods like ray casting, FingerSlider leverages the
+natural range of finger motion and fine motor control.
+mapped value =
+
+IV. P RELIMINARY O BJECT M ANIPULATION S TUDY
+To initially evaluate FingerSlider’s core concept for multiattribute object manipulation, we conducted a preliminary
+controlled experiment. Each finger was mapped to a specific
+control: the index finger to X-axis movement, the middle finger
+to Y-axis movement, the ring finger to Z-axis movement, and
+the little finger to object scale, with the thumb serving as the
+interactor.
+A. Methodology Overview
+A within-subjects design was used with six participants (5
+male, 1 female, aged 23-34) comparing FingerSlider to a baseline gesture system. The baseline system adopted a standard
+VR gesture control paradigm widely used in current VR applications. Specifically, it utilized pinch gestures between the
+index finger and thumb to manipulate virtual sliders displayed
+in the user’s field of view. Users can perform a pinch-and-drag
+motion to adjust slider values, with visual feedback provided
+through on-screen UI elements. This method represents the
+conventional indirect manipulation approach commonly found
+in commercial VR systems such as Meta Quest’s default
+interaction mode, supported by an additional visual interface
+(Figure 5b). Both systems were implemented in Unity3D
+
+(a) FingerSlider Method
+
+(b) Baseline Pinch-Gesture
+Method
+
+Fig. 5: Gesture manipulation methods compared in the preliminary study.
+
+with an Oculus Quest 2 and Leap Motion. Tasks involved
+positioning objects with increasing complexity, from singleaxis (1D) to four-dimensional (4D) control (e.g., adjusting
+X, Y, Z, and scale to target values). Key metrics included
+task completion time, System Usability Scale (SUS), and user
+preference. Participants had a 2-minute familiarization period
+for each system, which was sufficient for learning the fingerto-parameter mappings without extensive pre-training.
+B. Key Findings and Limitations Identified
+
+Fig. 6: Participants’ Satisfaction with Different Systems.
+FingerSlider demonstrated notable efficiency in simple,
+single-parameter tasks (Task 1), averaging 24.5s compared to
+the baseline’s 43.0s (Cohen’s d = -0.61, Table I). However,
+as task complexity increased to involve multiple attributes
+(Tasks 2-4: 2D to 4D control), FingerSlider’s performance
+declined significantly, with completion times exceeding the
+baseline (e.g., Task 4: 116.17s for FingerSlider vs. 57.0s for
+baseline). This was primarily attributed to challenges in multifinger recognition and coordination, particularly involving the
+ring and little fingers, leading to operational confusion and
+unintended adjustments.
+The System Usability Scale (SUS) score for FingerSlider
+in this initial phase was 58.75 (Median: 57.50, SD: 4.37),
+indicating marginal usability. Figure 6 highlighted that despite
+performance issues in complex tasks, participants found FingerSlider’s core interaction model intuitive and preferred its
+responsiveness for parameter switching. However, dissatisfaction arose from finger recognition inaccuracies, especially for
+the ring and little fingers.
+These preliminary results were pivotal. While FingerSlider
+showed promise for intuitive single-parameter control, the
+challenges with multi-finger coordination using all four fingers
+were evident. The optical tracking system struggled to reliably
+distinguish the movements of the ring and little fingers, especially when they occurred concurrently. This led to refining
+
+TABLE I: Summary of Task Completion Times (Mean, SD in
+seconds) and Effect Sizes from Preliminary Study (n = 6).
+Task
+Task 1 (1D)
+Task 2 (2D)
+Task 3 (3D)
+Task 4 (4D)
+
+C. Participants
+
+2.03
+
+Sixteen participants (13 male, 3 female, aged 23–34) from
+the university, all with at least minimal prior VR experience,
+partook in this experiment. Six had participated in the preliminary study; focused interviews with them post-experiment
+gathered insights across both phases. All provided informed
+consent.
+
+1.87
+
+D. Experiment Task
+
+Method
+
+Mean (s)
+
+SD (s)
+
+Cohen’s d
+
+FingerSlider
+Baseline
+FingerSlider
+Baseline
+FingerSlider
+Baseline
+FingerSlider
+Baseline
+
+24.50
+43.00
+73.33
+35.83
+97.33
+40.00
+116.17
+57.00
+
+13.11
+41.36
+42.99
+8.61
+34.37
+20.37
+36.68
+25.37
+
+–0.61
+1.21
+
+FingerSlider for the Specific Task Experiment, focusing on a
+two-finger (index and middle) interaction model.
+V. S PECIFIC TASK E XPERIMENT
+A. System Adjustment
+Findings from the preliminary study indicated FingerSlider’s strength in single-parameter tasks (24.5s vs. 43.0s,
+Cohen’s d = -0.61) and its fluid interaction, but multi-finger
+operations with ring and little fingers suffered from recognition
+issues. Consequently, we developed an optimized FingerSlider
+version focusing on its core strengths by removing ring and
+little finger functionality, concentrating control through the
+index and middle fingers. To further enhance stability, we
+enlarged the slider bar and central interaction button by 1 mm
+in width and height (to 9 mm), allowing them to protrude
+slightly above the ghost hand model. This aimed to facilitate
+smoother thumb interaction and reduce recognition errors.
+B. Comparison Study Design
+To comprehensively evaluate FingerSlider’s usability in a
+practical scenario, we designed a comparative experiment
+focused on VR reading, a common task requiring precision
+and comfort. Referencing established methodologies [27], we
+aimed to verify enhancements in operational stability, user
+experience, and usability. The baseline system featured an
+identical reading interface to FingerSlider (Figure 7) for fair
+comparison. This interface included a right vertical scroll bar
+(controlled by index finger sliding in FingerSlider) and a
+bottom horizontal scroll bar for page turning (controlled by
+middle finger sliding in FingerSlider). The baseline system
+used gesture-based indirect operations for these functions.
+
+Fig. 7: Content reading interface, identical in both systems for
+the experiment.
+
+A randomized controlled design was employed. Participants
+completed two reading tasks (short: 500 words; long: 1500
+words) using both systems in a counterbalanced order to mitigate order effects. Standardized training preceded the tasks.
+To ensure task standardization and fairness, the study utilized
+GPT-4o to generate reading materials that were matched
+for word count and difficulty.(verified using Flesch-Kincaid
+readability tests [33], Table II)
+TABLE II: Readability of AI-Generated Materials
+Material
+
+Ease Score
+
+Avg. Words/Sentence
+
+Words
+
+Short 1
+Short 2
+Long 1
+Long 2
+
+70.4
+71.5
+74.0
+72.0
+
+15.4
+16.6
+14.2
+15.7
+
+482
+516
+1431
+1433
+
+E. Experiment Measurement
+We employed objective metrics (hand movement amplitude, task completion time) and subjective evaluations (questionnaires on user satisfaction, operational smoothness, system preference). Hand movement was measured via a custom real-time hand-tracking system (MediaPipe Hands in
+Python/PyQt5) extracting 3D coordinates of 21 hand landmarks from webcam input.
+F. Results
+Statistical comparisons between FingerSlider and the baseline system were performed using paired t-tests with α = 0.05.
+Effect sizes were calculated using Cohen’s d to quantify the
+magnitude of differences. For SUS score comparisons between
+the preliminary and main experiments, Welch’s t-test was
+employed to account for unequal sample sizes.
+1) Proposed System Demonstrates Greater Stability:
+Heatmaps (Figures 8, 9) and scatter plots (Figures 10, 11)
+revealed FingerSlider’s higher operational stability. Baseline
+system heatmaps (e.g., Figures 9b, 8b) showed scattered hand
+movements over a broader area, especially in long-text tasks.
+This aligns with common observations of indirect interaction
+and was corroborated by scatter plots showing high trajectory
+dispersion. Baseline users often made large hand movements
+and repeated adjustments. Feedback indicated the baseline’s
+pinch gesture frequently led to unintended slider deselection.
+In contrast, FingerSlider concentrated hand movements
+in a smaller, well-defined area (Figures 9a, 8a), reflecting
+more stable, controlled operations. Its scatter plots showed
+
+(a) Proposed: Short
+
+(b) Baseline: Short
+
+Fig. 8: Heatmap comparisons of hand movement in short
+content tasks. Color intensity represents movement frequency
+(red: high frequency, blue: low frequency). Axes show spatial
+coordinates in millimeters relative to the tracker center.
+
+(a) Proposed: Short (01:39.10)
+
+Fig. 11: Scatter plot comparisons of hand movement in Short
+Content tasks (Average times shown).
+TABLE III: Average Hand-Movement Envelope and Reduction
+Condition
+Short X
+Short Y
+Long X
+Long Y
+
+(a) Proposed: Long
+
+(b) Baseline: Long
+
+Fig. 9: Heatmap comparisons of hand movement in long
+content tasks.
+
+compact, continuous trajectories. FingerSlider minimized excessive hand repositioning by confining interaction to the
+participant’s chest area, with most interactions via subtle
+thumb movements. This reduced physical load, particularly
+benefiting extended tasks where baseline users showed higher
+fatigue (supporting H1). Occasional trajectory deviations in
+FingerSlider were attributed to hand repositioning after rare
+tracking failures.
+
+(a) Proposed: Long (02:16.09)
+
+(b) Baseline: Long (03:07.48)
+
+Fig. 10: Scatter plot comparisons of hand movement trajectories in long content tasks. Points represent hand position samples over time. Axes show spatial coordinates in millimeters
+relative to the tracker center. Average task completion times
+are shown in parentheses.
+
+(b) Baseline: Short (01:43.18)
+
+Proposed (mm)
+
+Baseline (mm)
+
+Reduction (%)
+
+284.6
+183.0
+218.5
+154.0
+
+304.9
+305.8
+372.2
+295.5
+
+6.7
+40.2
+41.3
+47.9
+
+2) Proposed System Demonstrates Superior Efficiency: The
+baseline system required longer operation times. In the longtext reading task, the baseline averaged 3:07.48 (Figure 10).
+FingerSlider showed clear efficiency advantages. Integrating
+the slider onto the hand allowed real-time status monitoring while focusing on content, reducing attention shifts and
+cognitive overhead (supporting H3). In the long-text task,
+FingerSlider was over 30% faster (02:16.09 vs. 03:07.48).
+Even in short-text tasks (01:39.10 vs. 01:43.18, Figure 11),
+it maintained higher efficiency. User feedback confirmed
+FingerSlider’s intuitive design enabled smoother operations
+(supporting H4). As shown in Table III, in the short task,
+the horizontal range decreases by 6.7% and the vertical range
+by 40.2%, while in the long task, it falls by 41.3% and
+47.9%, respectively. This confirms that the Proposed System
+effectively reduces users’ arm swings during all tasks, thereby
+lowering physical strain and improving overall task efficiency.
+3) Proposed System Achieved High User Satisfaction:
+Comparative evaluation (Figure 12) showed FingerSlider significantly outperformed the baseline in “Ease of use” (81.2%
+vs. 18.8%) and “Overall experience satisfaction” (75.0% vs.
+25.0%), achieving high user approval (supporting H2). For
+“Smoother content Browse,” FingerSlider performed slightly,
+but not significantly, lower; feedback suggested occasional
+Leap Motion over-sensitivity caused unintended page jumps.
+FingerSlider achieved an average System Usability Scale
+(SUS) score of 82.81 (Median: 83.75, Table IV), indicating
+high usability. This was a significant improvement from the
+preliminary study’s 58.75 (a 40.95% increase, p < 0.001, Cohen’s d = 3.64, Table V), underscoring the two-finger design’s
+effectiveness. The SUS score distribution (Figure 13) showed
+most participants rated the system positively on learnability,
+functionality, and intuitive operation.
+Some participants expressed minor concerns regarding
+“Confidence in use” citing the need to adapt to gesture
+
+mistouches, pointing to challenges with hand morphology
+variations. Limitations in interaction range at extreme finger
+positions were also noted.
+VI. L IMITATIONS AND F UTURE W ORK
+
+Fig. 12: Comparative evaluation: User preference for “Ease
+of use” and “Overall experience satisfaction” significantly favored FingerSlider (p = 0.0011 and p = 0.0121 respectively).
+“Smoother content Browse” showed no significant difference
+(p = 0.7244).
+TABLE IV: FingerSlider SUS Results (n = 16)
+Mean
+
+Median
+
+Max
+
+Min
+
+Std. Dev
+
+82.81
+
+83.75
+
+97.50
+
+65.00
+
+7.93
+
+recognition stability. The substantial improvement in the SUS
+score, however, validates that simplifying to two-finger control
+enhances usability.
+
+Current limitations include sensitivity and mapping challenges, such as the need for movements with extended content
+due to fixed finger lengths; future iterations should refine this
+mapping and explore user-configurable sensitivity options. The
+system also exhibited some dependency on hand morphology.
+While effective for VR reading, its application scope needs
+broadening. Although the preliminary study (n = 6) was
+small, the main study (n=16) demonstrated statistically significant improvements (e.g., SUS score increase, p < 0.001,
+Cohen’s d = 3.64), with consistent qualitative findings validating the approach; nonetheless, future studies will involve
+larger, more diverse participant groups. The two-finger system
+was an optimization due to current optical tracker limitations;
+robust full-hand recognition remains a future goal.
+Future work will focus on advanced gesture recognition
+methods to enhance accuracy and accommodate wider hand
+variations. We also aim to incorporate a broader range of
+gestures (e.g., taps, fist gestures) and explore integration with
+haptic feedback. Furthermore, we plan to investigate adaptive
+algorithms for dynamic sensitivity adjustment and personalized control mappings.
+VII. C ONCLUSION
+
+G. Discussion
+Post-experiment interviews revealed strong positive impressions. Participants found FingerSlider intuitive, smooth,
+interactive, and comfortable for long-term use due to its
+minimal body movement, which contrasts with the baseline’s
+larger arm movements. One noted, “Using the FingerSlider
+system doesn’t require additional body movement...much more
+comfortable for long-term use”.
+We observed participants subconsciously adapting to minor
+misalignments between the slider and finger flexion. This
+highlights users’ natural adaptive capabilities. The positive reception underscores that VR control granularity should match
+the dexterity of the input mechanism. Mapping controls to
+fine finger motor skills qualitatively improved comfort and
+precision.
+However, occasional mistouches occurred. While reduced,
+optical gesture recognition was sometimes overly sensitive.
+One participant suggested sensitivity adjustments. Notably,
+one participant with thin hands experienced more frequent
+TABLE V: Comparative Analysis of SUS Evaluation Results
+Between Experiments.
+Statistic
+
+Task (n = 16)
+
+Prelim (n = 6)
+
+Mean
+Median
+Std. Dev.
+
+82.81
+83.75
+7.93
+
+58.75
+57.50
+4.37
+
+Cohen’s d = 3.64(Large). p < 0.001
+
+Diff
++40.95%
++45.65%
+—
+
+This paper introduces FingerSlider, an innovative singlehanded gesture-based interface for intuitive multi-attribute
+control in VR, leveraging optical hand tracking and an adaptive
+sliding-distance mapping algorithm. Comparative experiments
+demonstrated FingerSlider can outperform traditional methods
+in operational efficiency, user experience, and precision, particularly in simpler tasks, while reducing cognitive load and
+learning curve. Users lauded its intuitive design and responsive
+parameter switching.
+R EFERENCES
+[1] J. Pottle, “Virtual reality and the transformation of medical education,”
+Future healthcare journal, vol. 6, no. 3, pp. 181–185, 2019.
+[2] A. Hamurcu, Ş. Timur, and K. Rızvanoğlu, “An overview of virtual
+reality within industrial design education,” Journal of Engineering,
+Design and Technology, vol. 18, no. 6, pp. 1889–1905, 2020.
+[3] Y. LI, J. HUANG, F. TIAN, H.-A. WANG, and G.-Z. DAI, “Gesture
+interaction in virtual reality,” Virtual Reality & Intelligent Hardware,
+vol. 1, no. 1, pp. 84–112, 2019.
+[4] M. Karam, A framework for research and design of gesture-based
+human-computer interactions. PhD thesis, University of Southampton,
+2006.
+[5] Y. Wang, Y. Li, and H.-N. Liang, “Comparative analysis of artefact
+interaction and manipulation techniques in vr museums: a study of performance and user experience,” in 2023 IEEE international symposium
+on mixed and augmented reality (ISMAR), pp. 761–770, IEEE, 2023.
+[6] D. A. Bowman and L. F. Hodges, “An evaluation of techniques for
+grabbing and manipulating remote objects in immersive virtual environments,” in Proceedings of the 1997 symposium on Interactive 3D
+graphics, pp. 35–ff, 1997.
+[7] R. Shi, J. Zhang, W. Stuerzlinger, and H.-N. Liang, “Group-based object
+alignment in virtual reality environments,” in Proceedings of the 2022
+ACM Symposium on Spatial User Interaction, pp. 1–11, 2022.
+
+Fig. 13: SUS score distribution for the optimized FingerSlider (n = 16), illustrating positive user feedback.
+
+[8] M. Höll, M. Oberweger, C. Arth, and V. Lepetit, “Efficient physics-based
+implementation for realistic hand-object interaction in virtual reality,” in
+2018 IEEE Conference on Virtual Reality and 3D User Interfaces (VR),
+pp. 175–182, 2018.
+[9] J. C. Cardoso, “Comparison of gesture, gamepad, and gaze-based
+locomotion for vr worlds,” in Proceedings of the 22nd ACM conference
+on virtual reality software and technology, pp. 319–320, 2016.
+[10] J. D. Hincapié-Ramos, X. Guo, P. Moghadasian, and P. Irani, “Consumed
+endurance: a metric to quantify arm fatigue of mid-air interactions,” in
+Proceedings of the SIGCHI Conference on Human Factors in Computing
+Systems, CHI ’14, (New York, NY, USA), p. 1063–1072, Association
+for Computing Machinery, 2014.
+[11] D. Norman, The design of everyday things: Revised and expanded
+edition. Basic books, 2013.
+[12] S. Bryson, “Direct manipulation in virtual reality,” 2003.
+[13] B. Shneiderman, “Direct manipulation: A step beyond programming
+languages,” Computer, vol. 16, no. 08, pp. 57–69, 1983.
+[14] M. M. North, S. M. North, et al., “A comparative study of sense
+of presence of traditional virtual reality and immersive environments,”
+Australasian Journal of Information Systems, vol. 20, 2016.
+[15] I. Poupyrev, T. Ichikawa, S. Weghorst, and M. Billinghurst, “Egocentric
+object manipulation in virtual environments: empirical evaluation of
+interaction techniques,” in Computer graphics forum, vol. 17, pp. 41–52,
+Wiley Online Library, 1998.
+[16] M. R. Mine, F. P. Brooks, and C. H. Sequin, “Moving objects in
+space: exploiting proprioception in virtual-environment interaction,” in
+Proceedings of the 24th Annual Conference on Computer Graphics
+and Interactive Techniques, SIGGRAPH ’97, (USA), p. 19–26, ACM
+Press/Addison-Wesley Publishing Co., 1997.
+[17] M. R. Dastmalchi and A. Goli, “Embodied learning in virtual reality:
+Comparing direct and indirect interaction effects on educational outcomes,” in 2024 IEEE Frontiers in Education Conference (FIE), pp. 1–7,
+IEEE, 2024.
+[18] J. A. di Lanzo, A. Valentine, F. Sohel, A. Y. Yapp, K. C. Muparadzi, and
+M. Abdelmalek, “A review of the uses of virtual reality in engineering
+education,” Computer Applications in Engineering Education, vol. 28,
+no. 3, pp. 748–763, 2020.
+[19] R. Dachselt and A. Hübner, “Virtual environments: Three-dimensional
+menus: A survey and taxonomy,” Comput. Graph., vol. 31, p. 53–65,
+jan 2007.
+[20] T. Azai, M. Otsuki, F. Shibata, and A. Kimura, “Open palm menu: A
+virtual menu placed in front of the palm,” in Proceedings of the 9th
+Augmented Human International Conference, pp. 1–5, 2018.
+[21] Z. Li, J. Chan, J. Walton, H. Benko, D. Wigdor, and M. Glueck,
+“Armstrong: An empirical examination of pointing at non-dominant
+
+arm-anchored uis in virtual reality,” in Proceedings of the 2021 CHI
+Conference on Human Factors in Computing Systems, pp. 1–14, 2021.
+[22] J. Fashimpaur, A. Karlson, T. R. Jonker, H. Benko, and A. Gupta,
+“Investigating wrist deflection scrolling techniques for extended reality,”
+in Proceedings of the 2023 CHI Conference on Human Factors in
+Computing Systems, pp. 1–16, 2023.
+[23] X. Li, Y. Chen, and X. Tang, “Gesplayer: Using augmented gestures
+to empower video players,” in Companion Proceedings of the 2022
+Conference on Interactive Surfaces and Spaces, pp. 4–8, 2022.
+[24] F. He, X. Hu, J. Shi, X. Qian, T. Wang, and K. Ramani, “Ubi
+edge: Authoring edge-based opportunistic tangible user interfaces in
+augmented reality,” in Proceedings of the 2023 CHI Conference on
+Human Factors in Computing Systems, pp. 1–14, 2023.
+[25] Y. Jiang, C. Zhang, H. Fu, A. Cannavò, F. Lamberti, H. Y. Lau, and
+W. Wang, “Handpainter-3d sketching in vr with hand-based physical
+proxy,” in Proceedings of the 2021 CHI conference on human factors
+in computing systems, pp. 1–13, 2021.
+[26] R. Arora, R. H. Kazi, D. M. Kaufman, W. Li, and K. Singh, “Magicalhands: Mid-air hand gestures for animating in vr,” in Proceedings
+of the 32nd annual ACM symposium on user interface software and
+technology, pp. 463–477, 2019.
+[27] J. Gabel, M. Ludwig, and F. Steinicke, “Immersive reading: Comparison
+of performance and user experience for reading long texts in virtual
+reality,” in Extended Abstracts of the 2023 CHI Conference on Human
+Factors in Computing Systems, pp. 1–8, 2023.
+[28] E. Barnard and G. Mendoza, “Variations in the finger length of the
+human hand,” in Proceedings of the Iowa Academy of Science, vol. 61,
+pp. 458–462, 1954.
+[29] J. Sweller, “Cognitive load during problem solving: Effects on learning,”
+Cognitive science, vol. 12, no. 2, pp. 257–285, 1988.
+[30] N. Yu, “Figurative uses of finger and palm in chinese and english,”
+Metaphor and symbol, vol. 15, no. 3, pp. 159–175, 2000.
+[31] L. A. Jones and S. J. Lederman, Human hand function. Oxford university
+press, 2006.
+[32] C. Häger-Ross and M. H. Schieber, “Quantifying the independence of
+human finger movements: comparisons of digits, hands, and movement
+frequencies,” Journal of Neuroscience, vol. 20, no. 22, pp. 8542–8550,
+2000.
+[33] M. Solnyshkina, R. Zamaletdinov, L. Gorodetskaya, and A. Gabitov,
+“Evaluating text complexity and flesch-kincaid grade level,” Journal of
+social studies education research, vol. 8, no. 3, pp. 238–248, 2017.
+
+

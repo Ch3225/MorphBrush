@@ -1,0 +1,17 @@
+# VRBrush Experiment Record
+# Generated: 2026/02/06 5:42:46
+
+[experiment]
+timestamp = "2026-02-06 05:42:46"
+type = "Ex1"
+brush_variant = "ADBrush"
+elapsed_time_seconds = 20.25
+undo_count = 0
+
+[output]
+obj_file = "Drawing_20260206_054246.obj"
+
+[statistics]
+stroke_count = 1
+total_vertices = 132
+total_triangles = 260

@@ -1,4 +1,6 @@
-This is the repository of 
+This is the repository for the paper:
+
 MorphBrush: Spatial Drawing with Morphable VR Brush Using Generalized Cylinders
 
-Source code is waiting to be uploaded.
+Code By: Yude Lu
+Paper Author: Yude Lu, Xusheng Du, Bofei Huang, Haoran Xie
